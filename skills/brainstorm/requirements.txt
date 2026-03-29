@@ -1,0 +1,5 @@
+# Required
+numpy
+
+# Optional — enables semantic similarity layer (recommended)
+sentence-transformers
