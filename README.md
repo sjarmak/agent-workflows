@@ -111,7 +111,41 @@ See `examples/` for detailed walkthroughs:
 
 ## Installation
 
-Copy the skills you want into your Claude Code configuration:
+### Option 1: Plugin (recommended)
+
+Install the whole repo as a Claude Code plugin. You get all 10 skills, 3 pipeline agents, hooks for formatting/notifications/verification/worktree setup, and diff-aware scoping — in one step.
+
+```bash
+# Clone the repo
+git clone https://github.com/sjarmak/agent-workflows.git
+
+# Load it as a plugin
+claude --plugin-dir ./agent-workflows
+```
+
+Skills are available as `/agent-workflows:<skill-name>`:
+```
+/agent-workflows:diverge "How should we design the auth system?"
+/agent-workflows:premortem path/to/design.md
+/agent-workflows:stress-test src/auth/
+```
+
+Pipeline agents are available via `/agents` or directly:
+```bash
+claude --agent agent-workflows:full-pipeline "How should we redesign the auth system?"
+claude --agent agent-workflows:security-pipeline src/api/
+```
+
+To load the plugin automatically for all sessions, add it to your project's `.claude/settings.json`:
+```json
+{
+  "plugins": ["./path/to/agent-workflows"]
+}
+```
+
+### Option 2: Copy individual skills
+
+Copy just the skills you want into your Claude Code configuration:
 
 ```bash
 # Global (available in all projects)
@@ -137,6 +171,21 @@ cp -r skills/crossbreed/SKILL.md .claude/commands/crossbreed.md
 cp -r skills/scaffold/SKILL.md .claude/commands/scaffold.md
 cp -r skills/distill/SKILL.md .claude/commands/distill.md
 cp -r skills/bisect/SKILL.md .claude/commands/bisect.md
+```
+
+### Option 3: Copy hooks and agents separately
+
+To get the automation without the plugin:
+
+```bash
+# Copy agents to your global config
+cp agents/code-simplifier.md ~/.claude/agents/
+cp agents/full-pipeline.md ~/.claude/agents/
+cp agents/security-pipeline.md ~/.claude/agents/
+
+# Copy the hooks configuration to your project
+# (merge with existing hooks in .claude/settings.json if you have them)
+cat hooks/hooks.json
 ```
 
 ### Brainstorm setup

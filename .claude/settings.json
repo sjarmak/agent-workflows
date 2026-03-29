@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm test *)",
+      "Bash(npx prettier *)",
+      "Bash(python3 *)",
+      "Bash(black *)",
+      "Bash(gofmt *)"
+    ]
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}

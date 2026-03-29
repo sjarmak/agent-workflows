@@ -1,0 +1,56 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "CHANGED=$(git diff --name-only HEAD 2>/dev/null); UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null); if [ -n \"$CHANGED\" ] || [ -n \"$UNTRACKED\" ]; then echo \"Changed files since last commit:\n$CHANGED\"; if [ -n \"$UNTRACKED\" ]; then echo \"\nUntracked files:\n$UNTRACKED\"; fi; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FILE=$(jq -r '.tool_input.file_path // empty'); if [ -n \"$FILE\" ]; then case \"$FILE\" in *.js|*.ts|*.jsx|*.tsx|*.json|*.css|*.md) npx prettier --write \"$FILE\" 2>/dev/null || true;; *.py) black --quiet \"$FILE\" 2>/dev/null || true;; *.go) gofmt -w \"$FILE\" 2>/dev/null || true;; esac; fi"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v osascript &>/dev/null; then osascript -e 'display notification \"Claude Code needs your attention\" with title \"Agent Workflows\"' 2>/dev/null; elif command -v notify-send &>/dev/null; then notify-send 'Agent Workflows' 'Claude Code needs your attention' 2>/dev/null; fi; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "prompt",
+            "prompt": "Check if the task that was just completed produced output files or code changes. If output files were created (like prd_*.md, premortem_*.md, stress_test_*.md, scaffold_*.md, or distill_*.md), verify they exist and are non-empty. If code was changed, check that no obvious errors were introduced (missing imports, syntax errors, unclosed brackets). If everything looks good, respond {\"ok\": true}. If something is wrong, respond {\"ok\": false, \"reason\": \"description of the issue\"}."
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -n \"$WORKTREE_PATH\" ]; then cd \"$WORKTREE_PATH\" && if [ -f package.json ]; then npm install --silent 2>/dev/null; elif [ -f requirements.txt ]; then pip install -q -r requirements.txt 2>/dev/null; elif [ -f go.mod ]; then go mod download 2>/dev/null; elif [ -f Cargo.toml ]; then cargo fetch --quiet 2>/dev/null; fi; fi; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
