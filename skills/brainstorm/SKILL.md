@@ -16,6 +16,7 @@ way to do that is volume with a hard no-repetition constraint.
 ## Parsing Arguments
 
 `$ARGUMENTS` may start with a number (the idea target). Parse it:
+
 - `/brainstorm 10 How to optimize our API` → target=10, problem="How to optimize our API"
 - `/brainstorm How to optimize our API` → target=30 (default), problem="How to optimize our API"
 
@@ -24,6 +25,7 @@ Pass to init: `python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py init "<problem>
 ## The One Rule
 
 Every new idea must differ **in shape** from:
+
 1. Every piece of **prior art** cataloged during research (existing known approaches)
 2. Every **previous idea** in this session
 
@@ -45,11 +47,13 @@ genuinely different.
 ## Tools
 
 All session management goes through the brainstorm CLI:
+
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py <command> [args]
 ```
 
 Commands:
+
 - `init "<problem>" [--count N]` — Start a new session (default: 30 ideas)
 - `prior-art <session> "<title>" ["<desc>"] [--source S]` — Record a known approach (banned)
 - `prior-art-list <session>` — List all cataloged prior art
@@ -65,6 +69,7 @@ Commands:
 - `sessions` — List all sessions
 
 Sandboxes for prototyping:
+
 ```
 bash ${CLAUDE_SKILL_DIR}/scripts/sandbox.sh create <session> <idea-number>
 ```
@@ -72,6 +77,7 @@ bash ${CLAUDE_SKILL_DIR}/scripts/sandbox.sh create <session> <idea-number>
 ## Session Flow
 
 ### Phase 1: Setup
+
 1. Parse the user's arguments for target count and problem statement
 2. Run `init` with the problem (and `--count` if not 30)
 3. Confirm the problem framing with the user
@@ -91,11 +97,11 @@ principles, and it creates a landscape of known approaches to push beyond.
 2. Record the **structurally distinct** approaches as prior art (keep it to the major
    families of approaches, not every variation — aim for 5-10, not 50):
    ```
-   ${CLAUDE_SKILL_DIR}/scripts/.venv/bin/python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py prior-art <session> "<approach>" "<description>" --source "<where you found it>"
+   python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py prior-art <session> "<approach>" "<description>" --source "<where you found it>"
    ```
 3. When the landscape is sufficiently mapped, transition to brainstorming:
    ```
-   ${CLAUDE_SKILL_DIR}/scripts/.venv/bin/python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py begin <session>
+   python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py begin <session>
    ```
 
 **Framing:** Prior art is cataloged as a reference landscape. Near-duplicate ideas
@@ -103,7 +109,7 @@ principles, and it creates a landscape of known approaches to push beyond.
 with prior art is expected and fine — every idea in the problem space will share some
 vocabulary with known work. The goal is structural novelty, not vocabulary novelty.
 
-The research phase should leave you understanding: what does this problem *actually*
+The research phase should leave you understanding: what does this problem _actually_
 require? What assumptions do existing approaches make? Which of those assumptions
 are load-bearing and which are convention?
 
@@ -114,6 +120,7 @@ but: **what is the actual structure of this problem, and what approaches follow 
 that structure?**
 
 Think about:
+
 - What are the mathematical/computational invariants?
 - What does the problem actually require vs. what do existing solutions assume?
 - What constraints does the domain impose? What's truly load-bearing vs. convention?
@@ -126,9 +133,10 @@ Think about:
    prototype, the implementation isn't actually different — rethink or rework it.
 
 The full cycle for each idea:
+
 ```
 # 1. Propose — must pass text uniqueness
-${CLAUDE_SKILL_DIR}/scripts/.venv/bin/python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py add <session> "<title>" "<description>"
+python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py add <session> "<title>" "<description>"
 
 # 2. Prototype — build the minimal core (not a full implementation)
 bash ${CLAUDE_SKILL_DIR}/scripts/sandbox.sh create <session> <idea-number>
@@ -136,7 +144,7 @@ bash ${CLAUDE_SKILL_DIR}/scripts/sandbox.sh create <session> <idea-number>
 # ... 20-50 lines that prove this is a genuinely different computational shape
 
 # 3. Verify — must pass code uniqueness
-${CLAUDE_SKILL_DIR}/scripts/.venv/bin/python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py check-code <session> <idea-number>
+python3 ${CLAUDE_SKILL_DIR}/scripts/brainstorm.py check-code <session> <idea-number>
 ```
 
 **What counts as an MVP prototype:** Not a working system. The minimum code that
@@ -146,6 +154,7 @@ same data structure with the same branching pattern, they're the same idea regar
 of what you called the variables. The prototype makes that visible.
 
 **Your job during divergence:**
+
 - Offer ideas freely. You are a partner, not a scribe.
 - When momentum slows, note what structural territory hasn't been covered.
 - Build on the user's ideas ("yes, and...") but make sure the build changes the shape.
@@ -173,6 +182,7 @@ Once all ideas are captured, shift gears. Now we evaluate.
 ## Data Location
 
 Sessions live in `.brainstorm/<session-id>/` (in the current working directory):
+
 - `brainstorm.db` — SQLite database (structured tracking + prior art)
 - `ideas/NNN.md` — Individual idea files (unstructured content, notes)
 - `sandboxes/` — Prototype workspaces

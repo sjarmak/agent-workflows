@@ -9,6 +9,7 @@ $ARGUMENTS — format: `[N] [path/to/design.md or inline description]` where N i
 ## Parse Arguments
 
 Extract:
+
 - **agent_count**: the optional leading integer (default 5, min 3, max 7)
 - **input**: path to a design document, architecture doc, PRD, or project plan — or an inline project description
 
@@ -21,6 +22,7 @@ If the input is missing or unclear, ask the user to clarify before proceeding.
 **If inline**: parse the project description.
 
 Prepare a **project brief** that includes:
+
 - What is being built
 - Key technical decisions
 - Dependencies (internal and external)
@@ -57,6 +59,7 @@ Each agent MUST:
 7. NOT be told what other agents are exploring
 
 Agent prompt template (customize the lens per agent):
+
 ```
 You are a failure analyst conducting a premortem exercise.
 
@@ -102,14 +105,15 @@ After ALL agents return, produce the following synthesis:
 
 ### 1. Risk Registry Table
 
-| # | Failure Lens | Severity | Likelihood | Risk Score | Root Cause | Top Mitigation |
-|—-|——————-|—————|——————|—————-|——————|————————|
+| #   | Failure Lens | Severity | Likelihood | Risk Score | Root Cause | Top Mitigation |
+| --- | ------------ | -------- | ---------- | ---------- | ---------- | -------------- |
 
 Risk Score = Severity x Likelihood where Critical=4, High=3, Medium=2, Low=1 for severity and High=3, Medium=2, Low=1 for likelihood. Sort by risk score descending.
 
 ### 2. Cross-Cutting Themes
 
 Where did multiple failure lenses identify the same underlying vulnerability? These are the highest-priority risks. For each theme:
+
 - Which lenses surfaced it
 - Why this convergence increases confidence that the risk is real
 - The combined severity if this vulnerability is exploited
@@ -117,6 +121,7 @@ Where did multiple failure lenses identify the same underlying vulnerability? Th
 ### 3. Mitigation Priority List
 
 All mitigations ranked by:
+
 - How many failure modes they address
 - The severity of those failure modes
 - Implementation cost (Low / Medium / High)
@@ -124,6 +129,7 @@ All mitigations ranked by:
 ### 4. Design Modification Recommendations
 
 The top 3-5 concrete changes to the current design that would most reduce overall risk, synthesized from the individual mitigations. For each:
+
 - What to change
 - Which failure modes it addresses
 - Expected effort
@@ -137,6 +143,7 @@ Save the full output to a file `premortem_{slugified_topic}.md` in the working d
 ## Phase 4: Present and Act
 
 Present the risk registry and top recommendations to the user. Ask:
+
 - Do any of these failure modes feel especially likely or especially surprising?
 - Should we modify the design based on these findings before proceeding to implementation?
 - Would you like to deep-dive on any specific failure mode or mitigation?
@@ -144,6 +151,7 @@ Present the risk registry and top recommendations to the user. Ask:
 ## Pipeline Position
 
 Sits between /converge and /diverge-prototype as a risk gate:
+
 ```
 /converge (decision) -> /premortem (risk check) -> /diverge-prototype (build)
 ```

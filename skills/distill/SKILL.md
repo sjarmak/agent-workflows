@@ -7,6 +7,7 @@ $ARGUMENTS — format: `[path/to/artifact.md or inline text]`
 ## Parse Arguments
 
 Extract:
+
 - **artifact_source**: a file path or inline text
 
 If the argument looks like a file path (contains `/` or ends in a common extension), treat it as a path and read the file. Otherwise, treat the entire argument as inline text.
@@ -28,12 +29,14 @@ If no argument is provided, ask the user what artifact they want to distill.
 ## Phase 2: Run Compression Chain
 
 Run 4 sequential compression agents. Each one:
+
 1. Receives the previous agent's output (or the original artifact for agent 1)
-2. Must compress it to roughly 50% of its length
+2. Must compress it to roughly 50% of its length (note: code-heavy artifacts may compress non-linearly -- if the input is dominated by code blocks, summarize them rather than stripping entirely, and aim for 40-60% as an acceptable range)
 3. Must explicitly list what it DROPPED and why
 4. Must preserve the most important information in its judgment
 
 Agent prompt template for each stage:
+
 ```
 You are a compression agent. Your job is to compress the following text to roughly 50% of its current length while preserving the most important information.
 
@@ -64,6 +67,7 @@ You are a compression agent. Your job is to compress the following text to rough
 ```
 
 Run agents SEQUENTIALLY — each depends on the previous output:
+
 - Agent 1: Original -> ~50%
 - Agent 2: ~50% -> ~25%
 - Agent 3: ~25% -> ~12%
@@ -80,6 +84,7 @@ The final ~6% compressed version — the irreducible core of the artifact.
 
 **2. Priority Hierarchy**
 Classify every piece of content by how many compression rounds it survived:
+
 - **Tier 1 (Core)**: survived all 4 compressions — the absolute essentials
 - **Tier 2 (Important)**: survived 3 compressions — important but not irreducible
 - **Tier 3 (Supporting)**: survived 2 compressions — adds value but not critical
@@ -97,6 +102,7 @@ Save the full analysis to `distill_{slugified_topic}.md` in the working director
 ## Phase 4: Present
 
 Show the user:
+
 - The final essence (Tier 1)
 - The priority hierarchy (all 5 tiers)
 - The hardest cuts (areas of ambiguity)
@@ -117,6 +123,7 @@ Then ask: does this priority ranking match your intuition? Where does it diverge
 ## Pipeline Position
 
 Versatile — works after any phase that produces a large artifact:
+
 ```
 /diverge synthesis -> /distill -> priority hierarchy
 /converge report  -> /distill -> decision essence
