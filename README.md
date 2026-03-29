@@ -75,11 +75,11 @@ The converge skill requires Claude Code Agent Teams. Add this to your Claude Cod
 
 ## Design Principles
 
-1. Diverge before you converge. The first idea is rarely the best. Force volume and variety before evaluating.
-2. Independence produces insight. Agents that do not share context find different things. That is the point.
-3. Disagreement is signal. When agents conflict, the conflict reveals something about the problem.
-4. Prototypes beat debates. At some point, stop talking and build multiple versions. Let code argue.
-5. Composition over monoliths. Each skill does one thing. Chain them for complex workflows.
+1.** Diverge before you converge.** The first idea is rarely the best. Force volume and variety before evaluating.
+2.** Independence produces insight.** Agents that do not share context produce different findings from varied perspectives. 
+3.**Disagreement is signal.** When agents conflict, the conflict reveals something about the ambiguity of the problem.
+4.**Prototypes beat debates.** At some point, stop talking and build multiple versions. Let code argue.
+5.**Composition over monoliths.** Each skill does one thing. Chain them for complex workflows.
 
 ## License
 
