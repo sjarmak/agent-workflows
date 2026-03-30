@@ -7,6 +7,7 @@ $ARGUMENTS — format: `[N] [path/to/design.md or inline description]` where N i
 ## Parse Arguments
 
 Extract:
+
 - **agent_count**: the optional leading integer (default 4, min 2, max 6)
 - **design_input**: a file path to a design doc/prototype/PRD, or an inline description of what needs to be built
 
@@ -23,6 +24,7 @@ Read the design doc, prototype, or PRD provided. Extract the following:
 - **Deployment needs** — infrastructure, environments, CI/CD
 
 Prepare a **build brief** that summarizes:
+
 - What needs to be built
 - What exists already (if working within an existing codebase)
 - What the constraints are (technical, timeline, team)
@@ -49,6 +51,7 @@ Each agent MUST produce:
 - **Integration points** — where phases connect and how to test those connections
 
 Agent prompt template (customize the strategy per agent):
+
 ```
 You are a build-order planning agent. Given a design, you propose an implementation sequence using a specific strategy.
 
@@ -100,14 +103,14 @@ After ALL agents return, produce a unified analysis:
 
 ### 1. Strategy Comparison Table
 
-| Dimension | Strategy A | Strategy B | Strategy C | Strategy D |
-|-----------|-----------|-----------|-----------|-----------|
-| First thing built | ... | ... | ... | ... |
-| Time to first demo | ... | ... | ... | ... |
-| Risk front-loading | ... | ... | ... | ... |
-| Parallelism potential | ... | ... | ... | ... |
-| Stub/mock debt | ... | ... | ... | ... |
-| Integration risk | ... | ... | ... | ... |
+| Dimension             | Strategy A | Strategy B | Strategy C | Strategy D |
+| --------------------- | ---------- | ---------- | ---------- | ---------- |
+| First thing built     | ...        | ...        | ...        | ...        |
+| Time to first demo    | ...        | ...        | ...        | ...        |
+| Risk front-loading    | ...        | ...        | ...        | ...        |
+| Parallelism potential | ...        | ...        | ...        | ...        |
+| Stub/mock debt        | ...        | ...        | ...        | ...        |
+| Integration risk      | ...        | ...        | ...        | ...        |
 
 ### 2. Convergence Points
 
@@ -116,6 +119,7 @@ Where did multiple strategies agree on ordering? These are high-confidence seque
 ### 3. Key Trade-offs
 
 Where did strategies disagree? For each disagreement, articulate the specific trade-off:
+
 - Strategy X puts {component} first because {reason}
 - Strategy Y defers {component} because {reason}
 - The trade-off is: {what you gain vs. what you risk}
@@ -123,6 +127,7 @@ Where did strategies disagree? For each disagreement, articulate the specific tr
 ### 4. Recommended Build Plan
 
 Synthesize a recommended plan that combines the best insights from all strategies. For each sequencing choice, state:
+
 - What is built in this phase
 - Which strategy or strategies informed this choice
 - Why this ordering was selected over alternatives
@@ -135,9 +140,46 @@ Present the recommended build plan and the comparison analysis. Then ask the use
 
 - Does this build order match your team capacity and timeline?
 - Are there constraints I should factor in (team availability, hard deadlines, existing work in progress)?
-- Ready to start implementing phase 1?
+- Ready to seed beads and start implementing?
 
 Remind the user: plans change. The value is not in predicting the future perfectly but in having thought through the trade-offs so you can adapt faster when reality diverges.
+
+## Phase 5: Seed Beads
+
+If the user confirms the plan and `bd` is available (test with `bd status`), convert the recommended build plan into a Beads task hierarchy:
+
+1. **Create the epic**:
+
+   ```bash
+   bd create "<project/feature name>" -t epic -p 1 -d "<one-line summary of the full build>"
+   ```
+
+2. **Create a task bead for each phase** in the recommended plan, as children of the epic:
+
+   ```bash
+   bd create "<phase N: component name>" --parent <epic-id> -p <priority> -d "<what is built in this phase, verification criteria>"
+   ```
+
+3. **Wire up dependencies** between phases where ordering matters:
+
+   ```bash
+   bd dep add <later-phase-id> <earlier-phase-id>
+   ```
+
+4. **Show the resulting graph**:
+
+   ```bash
+   bd graph <epic-id>
+   ```
+
+5. **Show ready work**:
+   ```bash
+   bd ready --pretty
+   ```
+
+Present the seeded beads to the user. The first ready bead is where `/focus` picks up.
+
+If `bd` is not available, skip this phase and note that the user can seed beads manually later.
 
 ## Rules
 
@@ -152,8 +194,8 @@ Remind the user: plans change. The value is not in predicting the future perfect
 
 ## Pipeline Position
 
-This skill sits after design selection and before implementation:
+This skill sits after design selection and before focused implementation:
 
 ```
-/diverge-prototype or architecture decision -> /scaffold (plan build order) -> implementation
+/diverge-prototype or architecture decision -> /scaffold (plan + seed beads) -> /focus (work through beads)
 ```

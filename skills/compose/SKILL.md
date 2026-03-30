@@ -47,7 +47,7 @@ Launch **all N agents in parallel** using the Agent tool. Each agent receives th
 Each agent MUST receive the full skill catalog (below) and use ONLY skills from this list:
 
 ```
-SKILL CATALOG (18 skills):
+SKILL CATALOG (19 skills):
 
 brainstorm        — Constrained divergent ideation with shape-uniqueness enforcement
 diverge           — Multi-perspective parallel research from independent angles
@@ -66,6 +66,7 @@ replicate         — Independent verification by reimplementation
 contract          — Specification generation from examples
 diffuse           — Blast radius impact mapping for changes
 migrate           — Parallel migration strategy exploration
+focus             — Single-task execution loop (plan→execute→simplify→review→close) with Beads context tracking
 compose           — (this skill) Recursive pipeline composition for sub-goals
 ```
 

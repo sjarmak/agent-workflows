@@ -1,6 +1,6 @@
 # Agent Workflows
 
-Experimental multi-agent workflow patterns for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Eighteen skills that orchestrate parallel agents to research, brainstorm, prototype, debate, stress-test, plan, and more. See [`docs/`](docs/) for detailed reference guides.
+Experimental multi-agent workflow patterns for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Nineteen skills that orchestrate parallel agents to research, brainstorm, prototype, debate, stress-test, plan, execute, and review — with [Beads](https://github.com/steveyegge/beads) for cross-session task tracking. See [`docs/`](docs/) for detailed reference guides.
 
 ## Skills
 
@@ -72,10 +72,6 @@ Independent verification by reimplementation. Spawns N agents in isolated worktr
 
 ### Planning & Analysis
 
-#### [scaffold](skills/scaffold/)
-
-Build-order planning. Spawns N agents that each propose a different sequencing strategy (riskiest-first, demo-able-first, vertical slice, dependency-order, test-infra-first). Synthesizes into a recommended build plan with milestones.
-
 #### [distill](skills/distill/)
 
 Progressive compression. Runs an artifact through a chain of agents, each compressing by 50%. The key insight: what gets dropped at each layer reveals the priority hierarchy. The waste product is the signal.
@@ -85,6 +81,16 @@ Progressive compression. Runs an artifact through a chain of agents, each compre
 #### [bisect](skills/bisect/)
 
 Binary search for root cause. Uses agents to perform binary search through git history, configuration space, or dependency versions to isolate a regression. Adaptive topology: each step depends on the previous result.
+
+### Execution
+
+#### [focus](skills/focus/)
+
+Single-task execution loop. Enforces plan → execute → simplify → review → close, one bead at a time. Uses [Beads](https://github.com/steveyegge/beads) for task tracking so context survives across sessions. Handles cold starts (no beads yet) through inline decomposition or handoff to `/scaffold`.
+
+#### [scaffold](skills/scaffold/)
+
+Build-order planning. Spawns N agents that each propose a different sequencing strategy (riskiest-first, demo-able-first, vertical slice, dependency-order, test-infra-first). Synthesizes into a recommended build plan, then seeds Beads with an epic and task hierarchy.
 
 ### Meta
 
@@ -118,30 +124,58 @@ These skills chain together. The core pipeline runs research through implementat
                        pick winner
                             |
                         /scaffold
-                       (build plan)
+                  (build plan + seed beads)
                             |
-                      implementation
+                        /focus ←──────────┐
+                 (plan/execute/review)    |
+                            |            |
+                       bd close          |
+                     (next bead) ────────┘
 ```
 
-Not every project needs every step. Common shorter paths:
+Not every project needs every step. Pick the entry point that matches where you are:
 
-**Quick decision** (you already know the options):
+### I know what to build, just need to execute
 
-```
-/converge  >  /premortem  >  build
-```
-
-**Architecture spike** (you have a PRD):
+Single task or small epic (<10 tasks). `/focus` handles decomposition inline.
 
 ```
-/diverge-prototype  >  /stress-test  >  pick winner  >  /scaffold
+/focus "build auth with OAuth2 and RBAC"  >  plan  >  execute  >  simplify  >  review  >  close  >  next bead
 ```
 
-**Deep exploration** (greenfield problem):
+### I know the requirements, need a build plan
+
+Clear scope, multiple components, sequencing matters. `/scaffold` plans the order and seeds beads.
 
 ```
-/brainstorm  >  /fracture  >  /diverge  >  /converge  >  /premortem  >  /diverge-prototype  >  /stress-test  >  /scaffold
+/scaffold "design.md"  >  build plan  >  seed beads  >  /focus  >  work through beads
 ```
+
+### I have options, need to pick one
+
+Architecture decision with 2+ viable approaches.
+
+```
+/converge  >  /premortem  >  /scaffold  >  /focus
+```
+
+### I have a PRD, need to spike implementations
+
+Test approaches before committing.
+
+```
+/diverge-prototype  >  /stress-test  >  pick winner  >  /scaffold  >  /focus
+```
+
+### Greenfield — I don't know what to build yet
+
+Vague idea, need to explore the problem space first.
+
+```
+/brainstorm  >  /diverge  >  /converge  >  /premortem  >  /scaffold  >  /focus
+```
+
+### Other common paths
 
 **Spec validation** (verify a specification):
 
@@ -158,7 +192,7 @@ examples  >  /contract  >  draft spec  >  /replicate  >  validated spec
 **Migration planning** (system transition):
 
 ```
-/migrate  >  /stress-test  >  /scaffold  >  implement
+/migrate  >  /stress-test  >  /scaffold  >  /focus
 ```
 
 **Post-hoc analysis** (compress any large artifact):
@@ -189,7 +223,7 @@ See [`docs/workflows/`](docs/workflows/) for detailed workflow guides, and `exam
 
 ### Option 1: Plugin (recommended)
 
-Install the whole repo as a Claude Code plugin. You get all 18 skills, 3 pipeline agents, hooks for formatting/notifications/verification/worktree setup, and diff-aware scoping — in one step.
+Install the whole repo as a Claude Code plugin. You get all 19 skills, 3 pipeline agents, hooks for formatting/notifications/verification/worktree setup, and diff-aware scoping — in one step.
 
 ```bash
 # Clone the repo
@@ -246,6 +280,7 @@ cp -r skills/compose/SKILL.md ~/.claude/commands/compose.md
 cp -r skills/contract/SKILL.md ~/.claude/commands/contract.md
 cp -r skills/diffuse/SKILL.md ~/.claude/commands/diffuse.md
 cp -r skills/migrate/SKILL.md ~/.claude/commands/migrate.md
+cp -r skills/focus/SKILL.md ~/.claude/commands/focus.md
 
 # Project-scoped (one project only)
 cp -r skills/brainstorm .claude/skills/brainstorm
@@ -266,6 +301,7 @@ cp -r skills/compose/SKILL.md .claude/commands/compose.md
 cp -r skills/contract/SKILL.md .claude/commands/contract.md
 cp -r skills/diffuse/SKILL.md .claude/commands/diffuse.md
 cp -r skills/migrate/SKILL.md .claude/commands/migrate.md
+cp -r skills/focus/SKILL.md .claude/commands/focus.md
 ```
 
 ### Option 3: Copy hooks and agents separately
@@ -282,6 +318,29 @@ cp agents/security-pipeline.md ~/.claude/agents/
 # (merge with existing hooks in .claude/settings.json if you have them)
 cat hooks/hooks.json
 ```
+
+### Beads setup (for `/focus` and `/scaffold` bead seeding)
+
+The `/focus` skill and `/scaffold`'s bead-seeding phase require [Beads](https://github.com/steveyegge/beads) and [Dolt](https://docs.dolthub.com/introduction/installation):
+
+```bash
+# Install Dolt (version-controlled SQL database)
+# macOS
+brew install dolt
+
+# Linux (user-local, no sudo)
+curl -fsSL -o /tmp/dolt.tar.gz https://github.com/dolthub/dolt/releases/latest/download/dolt-linux-amd64.tar.gz
+tar xzf /tmp/dolt.tar.gz -C /tmp/ && cp /tmp/dolt-linux-amd64/bin/dolt ~/.local/bin/
+
+# Install Beads
+npm install -g @beads/bd
+
+# Initialize in your project
+cd your-project
+bd init
+```
+
+Without Beads, `/scaffold` still works (it just skips Phase 5) and `/focus` will prompt you to run `bd init`.
 
 ### Brainstorm setup
 
@@ -312,7 +371,10 @@ The converge skill requires Claude Code Agent Teams. Add this to your Claude Cod
 
 See [BEST_PRACTICES.md](BEST_PRACTICES.md) for the full guide. Key points:
 
+- **Use `/focus` for implementation.** Every coding session should start with `/focus` — it enforces plan → execute → simplify → review → close and tracks context in Beads so the next session picks up where you left off.
+- **One bead at a time.** Don't expand scope mid-task. Discoveries become new beads, not scope creep. Run `bd ready` to see what's next.
 - **Plan first, then execute.** Start every workflow in Plan mode (`Shift+Tab` twice). Iterate on the plan, then switch to auto-accept for execution.
+- **Let `/scaffold` seed your beads.** For multi-component work, run `/scaffold` first — it creates the epic, child tasks, and dependencies so `/focus` has structured work to pull from.
 - **Scope to changed files.** A `UserPromptSubmit` hook injects `git diff` into context so skills auto-focus on what you actually changed.
 - **Isolate with context:fork.** Run verbose skills in forked subagent context so only the synthesis returns to your main conversation.
 - **Chain skills into pipelines.** Use `initialPrompt` in agent definitions to run `/diverge` then `/converge` then `/premortem` as a single invocation.
