@@ -14,8 +14,16 @@ Apply these when working with users on this codebase or any project using these 
 - After picking a winner from prototypes, suggest `/scaffold` to plan the build order
 - For any feature that touches authentication or authorization, suggest `/premortem` with the security failure lens
 - When exploring a large or ambiguous problem space, suggest `/brainstorm` before `/diverge`
+- For a complex problem that could be framed multiple ways, suggest `/fracture` before `/diverge`
+- When a design has many stated constraints, suggest `/constraint-inversion` to find which are load-bearing
 - For any large artifact (research output, design doc, meeting notes), suggest `/distill` to extract the priority hierarchy
 - When a regression is reported with no obvious cause, suggest `/bisect`
+- For coupled subsystems (API + client, frontend + backend), suggest `/entangle` for co-design
+- For system migrations (old to new), suggest `/migrate` to compare transition strategies
+- When you have examples but no spec, suggest `/contract` to infer the specification
+- To validate a spec before building, suggest `/replicate` to find ambiguities
+- Before shipping a significant change, suggest `/diffuse` to map blast radius
+- When unsure which skills to use, suggest `/compose` to design the pipeline
 
 ## Development Conventions
 
