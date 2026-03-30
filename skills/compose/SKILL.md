@@ -104,7 +104,7 @@ Design a complete workflow pipeline for this goal using your assigned optimizati
 IMPORTANT:
 - You may use any subset of skills — you do NOT need to use all of them.
 - You may use the same skill more than once if it serves different purposes at different pipeline stages.
-- You may use "compose" recursively if the goal has a sub-goal that itself needs pipeline planning.
+- You may use "compose" recursively ONLY if the goal has a clearly identified sub-goal that itself warrants pipeline planning. Do NOT use "compose" as the first step of a top-level pipeline — it is for delegating sub-goal planning, not for re-planning the current goal.
 - Every skill you include must have a clear justification for its position in the sequence.
 
 ## Output Format

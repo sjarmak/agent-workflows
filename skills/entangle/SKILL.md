@@ -73,7 +73,7 @@ From this, draft the **initial contract file** — a structured document that de
 - {Unresolved interface decisions}
 ```
 
-Save the initial contract to the working directory as `contract_{slugified_topic}.md`.
+Save the initial contract to the working directory as `entangle_contract_{slugified_topic}.md`.
 
 Present the contract to the user and get confirmation before proceeding. The contract is the seed — agents will evolve it.
 

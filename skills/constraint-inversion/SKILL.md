@@ -201,16 +201,12 @@ Present the constraint dependency map, classification, and recommendations to th
 Sits early in the design process, before or alongside `/premortem`, as a constraint validation step:
 
 ```
-/brainstorm (explore) -> /diverge (research)
-                                \
-                                 -> /constraint-inversion (validate constraints)
-                                /
-                         /converge (decide) -> /premortem (risk check) -> /diverge-prototype (build)
+/diverge (research) -> /converge (decide) -> /constraint-inversion (validate constraints) -> /premortem (risk check) -> /diverge-prototype (build)
 ```
 
 Use `/constraint-inversion` when:
 
 - A design feels over-constrained and the team suspects some constraints are assumed rather than real
+- After `/converge`, to stress-test the constraints baked into the chosen approach before committing
 - Before `/premortem`, to ensure the constraints being designed around are the right ones
-- After `/converge`, to stress-test the constraints baked into the chosen approach
 - When a design is stuck and removing a constraint might reveal a path forward
