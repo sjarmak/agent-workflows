@@ -3,3 +3,8 @@ __pycache__/
 .venv/
 *.egg-info/
 .brainstorm/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
