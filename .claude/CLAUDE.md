@@ -48,6 +48,36 @@ Apply these when working with users on this codebase or any project using these 
 - To validate a spec before building, suggest `/replicate`
 - Before shipping a significant change, suggest `/diffuse` to map blast radius
 
+## ZFC Compliance
+
+This project is AI-orchestration code — ZFC applies at two levels:
+
+1. **L2 (tooling):** workflow skills must not use heuristics for semantic judgment
+2. **L3 (product):** patterns embedded in workflow outputs shape how users approach their own AI-mediated work
+
+### Compliant
+
+- `skills/converge/` — synthesis delegated to model judgment, no scoring formula
+- `skills/diverge/` — convergence/divergence detected by model reading all findings
+- `skills/diverge-prototype/` — prototype comparison by model, not by metric formula
+- `skills/premortem/` — agents assign severity/likelihood (semantic), multiplication is mechanical
+- `skills/contract/` — divergence map IS the output, no heuristic resolution
+- All synthesis phases — model reads agent outputs and makes judgment calls
+
+### Known violations
+
+None currently. The architecture is naturally ZFC-compliant because the core pattern (spawn independent agents → model synthesizes) delegates all reasoning by design.
+
+### Justified exceptions
+
+- `skills/brainstorm/scripts/similarity.py` — multi-layer duplicate detection (Jaccard, cosine, FTS5, code structural). This is mechanical comparison with calibrated thresholds, not semantic judgment. The `--force` flag provides escape hatch. Domain: "is string A similar to string B?" not "is idea A good?"
+- `skills/premortem/SKILL.md:108-111` — Risk Score = Severity x Likelihood. Agents provide the semantic inputs; multiplication is deterministic math.
+- `skills/focus/SKILL.md:22-57` — task readiness detection via `bd ready`. Pure status-field logic, no semantic judgment.
+
+### When to update this section
+
+Update ZFC compliance notes when: a new skill adds heuristic/scoring logic, an existing skill's synthesis phase changes from model judgment to coded logic, or a new justified exception is added.
+
 ## Development Conventions
 
 - Skills are plain markdown files at `skills/<name>/SKILL.md`
