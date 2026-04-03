@@ -8,14 +8,15 @@ Apply these when working with users on this codebase or any project using these 
 
 ### Entry point: where is the user?
 
-| Starting point                            | Recommended path                                                                 |
-| ----------------------------------------- | -------------------------------------------------------------------------------- |
-| Know what to build, just need to execute  | `/focus` (handles decomposition inline for small/medium work)                    |
-| Clear requirements, need a build plan     | `/scaffold` → `/focus`                                                           |
-| 2+ viable approaches, need to pick one    | `/converge` → `/premortem` → `/scaffold` → `/focus`                              |
-| Have a PRD, need to spike implementations | `/diverge-prototype` → `/stress-test` → pick winner → `/scaffold` → `/focus`     |
-| Greenfield, vague idea                    | `/brainstorm` → `/diverge` → `/converge` → `/premortem` → `/scaffold` → `/focus` |
-| Unsure which skills to use                | `/compose` to design the pipeline                                                |
+| Starting point                            | Recommended path                                                             |
+| ----------------------------------------- | ---------------------------------------------------------------------------- |
+| Know what to build, just need to execute  | `/focus` (handles decomposition inline for small/medium work)                |
+| Clear requirements, need a build plan     | `/scaffold` → `/focus`                                                       |
+| Have a PRD, want parallel automated build | `/prd-build` (decomposes PRD, dispatches parallel agents, merges)            |
+| 2+ viable approaches, need to pick one    | `/converge` → `/premortem` → `/scaffold` → `/focus`                          |
+| Have a PRD, need to spike implementations | `/diverge-prototype` → `/stress-test` → pick winner → `/scaffold` → `/focus` |
+| Greenfield, vague idea                    | `/research-project` → `/prd-build` (or `/scaffold` → `/focus`)               |
+| Unsure which skills to use                | `/compose` to design the pipeline                                            |
 
 ### Execution rules
 

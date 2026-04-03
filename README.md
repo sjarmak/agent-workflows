@@ -1,6 +1,6 @@
 # Agent Workflows
 
-Experimental multi-agent workflow patterns for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Nineteen skills that orchestrate parallel agents to research, brainstorm, prototype, debate, stress-test, plan, execute, and review — with [Beads](https://github.com/steveyegge/beads) for cross-session task tracking. See [`docs/`](docs/) for detailed reference guides.
+Experimental multi-agent workflow patterns for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Twenty-one skills that orchestrate parallel agents to research, brainstorm, prototype, debate, stress-test, plan, execute, and review — with [Beads](https://github.com/steveyegge/beads) for cross-session task tracking. See [`docs/`](docs/) for detailed reference guides.
 
 ## Skills
 
@@ -92,6 +92,16 @@ Single-task execution loop. Enforces plan → execute → simplify → review �
 
 Build-order planning. Spawns N agents that each propose a different sequencing strategy (riskiest-first, demo-able-first, vertical slice, dependency-order, test-infra-first). Synthesizes into a recommended build plan, then seeds Beads with an epic and task hierarchy.
 
+#### [prd-build](skills/prd-build/)
+
+Automated PRD-to-implementation orchestrator. Decomposes a PRD into a dependency-aware DAG of work units, dispatches parallel agents in isolated worktrees to implement and review each unit, and merges passing work onto an integration branch. Handles retries, evictions, and multi-pass recovery.
+
+### Pipelines
+
+#### [research-project](skills/research-project/)
+
+End-to-end research pipeline. Chains `/diverge` → `/converge` → `/premortem` in a single invocation to produce a risk-annotated PRD. Use when starting a non-trivial feature — produces a PRD ready for `/prd-build` or `/scaffold`.
+
 ### Meta
 
 #### [compose](skills/compose/)
@@ -126,11 +136,12 @@ These skills chain together. The core pipeline runs research through implementat
                         /scaffold
                   (build plan + seed beads)
                             |
-                        /focus ←──────────┐
-                 (plan/execute/review)    |
-                            |            |
-                       bd close          |
-                     (next bead) ────────┘
+                    ┌───────┴───────┐
+                /focus          /prd-build
+           (sequential)     (parallel agents)
+                    |               |
+               bd close        integration
+             (next bead)        branch
 ```
 
 Not every project needs every step. Pick the entry point that matches where you are:
@@ -173,6 +184,14 @@ Vague idea, need to explore the problem space first.
 
 ```
 /brainstorm  >  /diverge  >  /converge  >  /premortem  >  /scaffold  >  /focus
+```
+
+### Research-to-build — fully automated
+
+From idea to working code with parallel agents.
+
+```
+/research-project "topic"  >  /prd-build prd_topic.md  >  integration branch
 ```
 
 ### Other common paths
@@ -244,7 +263,7 @@ Skills are available as `/agent-workflows:<skill-name>`:
 Pipeline agents are available via `/agents` or directly:
 
 ```bash
-claude --agent agent-workflows:full-pipeline "How should we redesign the auth system?"
+claude --agent agent-workflows:research-project "How should we redesign the auth system?"
 claude --agent agent-workflows:security-pipeline src/api/
 ```
 
@@ -281,6 +300,8 @@ cp -r skills/contract/SKILL.md ~/.claude/commands/contract.md
 cp -r skills/diffuse/SKILL.md ~/.claude/commands/diffuse.md
 cp -r skills/migrate/SKILL.md ~/.claude/commands/migrate.md
 cp -r skills/focus/SKILL.md ~/.claude/commands/focus.md
+cp -r skills/research-project/SKILL.md ~/.claude/commands/research-project.md
+cp -r skills/prd-build/SKILL.md ~/.claude/commands/prd-build.md
 
 # Project-scoped (one project only)
 cp -r skills/brainstorm .claude/skills/brainstorm
@@ -302,6 +323,8 @@ cp -r skills/contract/SKILL.md .claude/commands/contract.md
 cp -r skills/diffuse/SKILL.md .claude/commands/diffuse.md
 cp -r skills/migrate/SKILL.md .claude/commands/migrate.md
 cp -r skills/focus/SKILL.md .claude/commands/focus.md
+cp -r skills/research-project/SKILL.md .claude/commands/research-project.md
+cp -r skills/prd-build/SKILL.md .claude/commands/prd-build.md
 ```
 
 ### Option 3: Copy hooks and agents separately
@@ -311,7 +334,7 @@ To get the automation without the plugin:
 ```bash
 # Copy agents to your global config
 cp agents/code-simplifier.md ~/.claude/agents/
-cp agents/full-pipeline.md ~/.claude/agents/
+cp agents/research-project.md ~/.claude/agents/
 cp agents/security-pipeline.md ~/.claude/agents/
 
 # Copy the hooks configuration to your project

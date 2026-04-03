@@ -1,6 +1,6 @@
-# Full Pipeline Workflow
+# Research Project Workflow
 
-The complete diverge-to-scaffold pipeline for new features. Use this when building something non-trivial from scratch where you want thorough exploration, risk assessment, and build planning before writing production code.
+The complete research-to-build pipeline for new features. Use this when building something non-trivial from scratch where you want thorough exploration, risk assessment, and build planning before writing production code.
 
 ## When to Use This Workflow
 
@@ -11,7 +11,7 @@ The complete diverge-to-scaffold pipeline for new features. Use this when buildi
 ## The Pipeline
 
 ```
-/brainstorm -> /diverge -> /converge -> /premortem -> /diverge-prototype -> /stress-test -> /scaffold -> build
+/brainstorm -> /research-project -> /diverge-prototype -> /stress-test -> /scaffold -> /prd-build (or /focus)
 ```
 
 ## Step-by-Step
@@ -30,18 +30,24 @@ The complete diverge-to-scaffold pipeline for new features. Use this when buildi
 
 7. **`/scaffold`** -- Plan the build order with competing sequencing strategies (riskiest-first, demo-able first, vertical slice). Output: recommended build plan.
 
-8. **Build** -- Implement following the scaffold plan.
+8. **Build** -- Implement using `/prd-build` for automated parallel execution, or `/focus` for sequential human-in-the-loop execution.
 
 ## Example Invocation
 
 ```
 /brainstorm 15 How to implement real-time collaboration for our editor
-/diverge prd_realtime_collab.md
-/converge diverge_realtime_collab.md
-/premortem prd_realtime_collab.md
+/research-project "real-time collaboration for our editor"
 /diverge-prototype prd_realtime_collab.md
 /stress-test src/collab/
 /scaffold chosen_prototype/PROTOTYPE_NOTES.md
+/prd-build prd_realtime_collab.md
+```
+
+Or the shortcut for when you trust the research and want to go straight to build:
+
+```
+/research-project "real-time collaboration for our editor"
+/prd-build prd_realtime_collab.md
 ```
 
 ## Tips

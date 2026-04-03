@@ -56,6 +56,18 @@ Reference documentation for all workflow skills and pre-built workflow pipelines
 | -------------------------- | ------------------------------------------------------- |
 | [bisect](skills/bisect.md) | Binary search for root cause of a regression or failure |
 
+### Execution
+
+| Skill                            | Description                                                               |
+| -------------------------------- | ------------------------------------------------------------------------- |
+| [prd-build](skills/prd-build.md) | Automated PRD-to-implementation via parallel agents in isolated worktrees |
+
+### Pipelines
+
+| Skill                                          | Description                                                       |
+| ---------------------------------------------- | ----------------------------------------------------------------- |
+| [research-project](skills/research-project.md) | Chains diverge-converge-premortem to produce a risk-annotated PRD |
+
 ### Meta
 
 | Skill                        | Description                                                       |
@@ -66,9 +78,10 @@ Reference documentation for all workflow skills and pre-built workflow pipelines
 
 | Workflow                                              | Description                                                         |
 | ----------------------------------------------------- | ------------------------------------------------------------------- |
-| [Full Pipeline](workflows/full-pipeline.md)           | The complete diverge-to-scaffold pipeline for new features          |
+| [Research Project](workflows/research-project.md)     | The complete diverge-to-scaffold pipeline for new features          |
 | [Quick Decision](workflows/quick-decision.md)         | Fast converge-to-build path for time-sensitive decisions            |
 | [Architecture Spike](workflows/architecture-spike.md) | Prototype, stress-test, and scaffold path for technical exploration |
+| [Research-to-Build](workflows/research-to-build.md)   | End-to-end research-project then prd-build for fully automated flow |
 | [Spec Validation](workflows/spec-validation.md)       | Contract-to-replicate loop for specification quality                |
 | [Change Impact](workflows/change-impact.md)           | Diffuse-to-stress-test change assessment                            |
 | [Migration Planning](workflows/migration-planning.md) | Migrate-to-scaffold path for system transitions                     |

@@ -25,6 +25,7 @@ Every workflow skill should end with verification. Some patterns:
 Add a Stop hook that spawns a verification agent when Claude finishes. This catches issues before you even look at the output.
 
 Add to `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
@@ -64,6 +65,7 @@ After any workflow that produces code (e.g., `/diverge-prototype`, `/crossbreed`
 ```
 
 This is a [bundled Claude Code skill](https://code.claude.com/docs/en/skills) that spawns three parallel review agents to check for:
+
 - Code reuse opportunities
 - Quality issues
 - Efficiency improvements
@@ -100,6 +102,7 @@ Prefer deletion over addition. The best code is code that doesn't exist.
 Multi-agent workflows are expensive. Don't analyze the whole codebase when you only changed three files. A `UserPromptSubmit` hook injects the list of changed files into context before any skill runs, so `/stress-test` and `/premortem` automatically focus on what you actually touched.
 
 Add to `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
@@ -141,10 +144,11 @@ Use `context: fork` on: `/diverge`, `/stress-test`, `/premortem`, `/brainstorm` 
 
 Instead of manually running `/diverge` then `/converge` then `/premortem` and copy-pasting between them, create a pipeline agent that chains them in one invocation.
 
-Save to `.claude/agents/full-pipeline.md`:
+Save to `.claude/agents/research-project.md`:
+
 ```markdown
 ---
-name: full-pipeline
+name: research-project
 description: Run the full diverge-converge-premortem pipeline
 initialPrompt: |
   Run the following workflow skills in sequence, passing outputs between them:
@@ -160,8 +164,9 @@ the output of each as input to the next. Summarize progress between steps.
 ```
 
 Launch with:
+
 ```bash
-claude --agent full-pipeline "How should we redesign the auth system?"
+claude --agent research-project "How should we redesign the auth system?"
 ```
 
 Create pipelines for your most common chains. A security-focused pipeline might chain `/stress-test` then `/premortem`. A design pipeline might chain `/brainstorm` then `/diverge` then `/converge`.
@@ -171,6 +176,7 @@ Create pipelines for your most common chains. A security-focused pipeline might 
 Workflow skills should have safety constraints that match their contract. `/stress-test` agents should analyze code, not modify it. `/brainstorm` agents should not execute arbitrary commands. `/bisect` agents should not push to remote.
 
 Add skill-specific `PreToolUse` hooks to `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
@@ -212,6 +218,7 @@ These are advisory — Claude suggests the workflow, you confirm. Over time, the
 Different workflow phases need different reasoning depth. Parallel fan-out agents (individual `/stress-test` attack vectors, `/diverge` research agents) can run at lower effort because their value comes from diversity, not depth. Synthesis and orchestration phases need maximum reasoning.
 
 Set `effort` in subagent definitions:
+
 ```yaml
 ---
 name: fast-researcher
@@ -223,6 +230,7 @@ tools: Read, Grep, Glob, Bash, WebSearch, WebFetch
 ```
 
 Combine with model selection for maximum cost efficiency:
+
 - **Orchestrator**: Opus, effort high/max — deep reasoning about synthesis and decisions
 - **Parallel workers**: Sonnet, effort medium — fast execution, diversity over depth
 - **Lightweight tasks**: Haiku, effort low — classification, formatting, simple checks
@@ -232,8 +240,10 @@ Combine with model selection for maximum cost efficiency:
 Skills can pre-compute expensive context before the prompt reaches Claude using the `` !`command` `` syntax in SKILL.md. This eliminates 3-5 tool-call round trips at the start of every invocation.
 
 Example: a `/stress-test` skill that starts with project state already loaded:
+
 ```markdown
 ## Project Context
+
 - Changed files: !`git diff --name-only HEAD~5`
 - Test count: !`find . -name '*.test.*' -not -path '*/node_modules/*' | wc -l`
 - Dependencies: !`cat package.json | jq '.dependencies | keys[]' 2>/dev/null | head -20`
@@ -247,6 +257,7 @@ The commands run immediately when the skill is invoked. Claude receives the actu
 Skills that use git worktrees (`/diverge-prototype`, `/crossbreed`) need dependencies installed in each worktree. Without this, prototype agents waste time on `npm install` or fail on missing packages.
 
 Add a `WorktreeCreate` hook to `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
@@ -271,6 +282,7 @@ Every worktree starts with a working environment. Prototype agents can immediate
 Use a PostToolUse hook to auto-format every file Claude edits. This handles the last 10% of formatting and avoids CI failures.
 
 Add to `.claude/settings.json`:
+
 ```json
 {
   "hooks": {
@@ -298,6 +310,7 @@ These workflow skills spawn multiple agents and can take minutes. Set up notific
 Add to `~/.claude/settings.json`:
 
 **macOS:**
+
 ```json
 {
   "hooks": {
@@ -317,6 +330,7 @@ Add to `~/.claude/settings.json`:
 ```
 
 **Linux:**
+
 ```json
 {
   "hooks": {
@@ -344,6 +358,7 @@ Avoid unnecessary permission prompts during multi-agent workflows. Use `/permiss
 ```
 
 Common safe additions for workflow skills:
+
 - `Bash(git *)` — git operations
 - `Bash(npm test *)` — running tests
 - `Bash(npx prettier *)` — formatting
@@ -354,11 +369,7 @@ These go in `.claude/settings.json` under `permissions.allow` and can be shared 
 ```json
 {
   "permissions": {
-    "allow": [
-      "Bash(git *)",
-      "Bash(npm test *)",
-      "Bash(npx prettier *)"
-    ]
+    "allow": ["Bash(git *)", "Bash(npm test *)", "Bash(npx prettier *)"]
   }
 }
 ```
@@ -461,31 +472,37 @@ tools: Read, Grep, Glob, Bash
 These are the most common chains for different situations. Start here and adapt:
 
 ### New Feature (High Risk)
+
 ```
 Plan mode → /brainstorm → /diverge → /converge → /premortem → /diverge-prototype → /stress-test → /simplify → /scaffold
 ```
 
 ### New Feature (Low Risk)
+
 ```
 Plan mode → /diverge → /converge → /diverge-prototype → /simplify → /scaffold
 ```
 
 ### Architecture Decision
+
 ```
 Plan mode → /diverge → /converge → /premortem → decide
 ```
 
 ### Post-Implementation Review
+
 ```
 /stress-test → /simplify → commit
 ```
 
 ### Bug Investigation
+
 ```
 /bisect → fix → /stress-test on the fix
 ```
 
 ### Compress Research
+
 ```
 /diverge → /distill → share with team
 ```
