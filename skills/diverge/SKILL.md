@@ -7,6 +7,7 @@ $ARGUMENTS — format: `[N] "research question or topic"` where N is optional (d
 ## Parse Arguments
 
 Extract:
+
 - **agent_count**: the optional leading integer (default 3, min 2, max 7)
 - **research_prompt**: the quoted or unquoted research question/topic
 
@@ -15,6 +16,7 @@ If the research prompt is missing or unclear, ask the user to clarify before pro
 ## Phase 1: Frame the Research
 
 Before spawning agents, frame the research space. Write a short research brief (3-5 bullet points) that:
+
 - States the core question
 - Lists known constraints or context from the conversation
 - Identifies 2-3 dimensions of exploration (e.g., technical feasibility, workflow design, prior art)
@@ -46,6 +48,7 @@ Launch **all N agents in parallel** using the Agent tool. Each agent MUST:
 5. Do NOT use worktrees (research only, no code changes)
 
 Agent prompt template (customize the lens per agent):
+
 ```
 You are a research agent exploring a question from a specific perspective.
 
@@ -100,6 +103,7 @@ Novel findings that came from only one agent's lens but are valuable. Flag the "
 
 **4. Consolidated Recommendations**
 Merge and prioritize all recommendations. For each:
+
 - State the recommendation
 - Note which agents support it (and from what angle)
 - Flag any dissenting views
@@ -119,29 +123,51 @@ Based on the synthesis, draft a mini-PRD markdown file:
 # PRD: {topic}
 
 ## Problem Statement
+
 {1-2 paragraphs from synthesis}
 
 ## Goals & Non-Goals
+
 ### Goals
+
 - ...
+
 ### Non-Goals
+
 - ...
 
 ## Requirements
+
+Each requirement MUST include verifiable acceptance criteria — a concrete condition that can be checked by running a command, reading output, or inspecting behavior. "Works correctly" is not verifiable. "Returns 200 with JSON body containing 'id' field" is.
+
 ### Must-Have
+
+- Requirement: ...
+  - Acceptance: {specific, testable condition}
 - ...
+
 ### Should-Have
+
+- Requirement: ...
+  - Acceptance: {specific, testable condition}
 - ...
+
 ### Nice-to-Have
+
+- Requirement: ...
+  - Acceptance: {specific, testable condition}
 - ...
 
 ## Design Considerations
+
 {Key tensions and trade-offs from divergence points}
 
 ## Open Questions
+
 {From synthesis}
 
 ## Research Provenance
+
 {Which lenses contributed, key convergence/divergence summary}
 ```
 

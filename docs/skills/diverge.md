@@ -28,7 +28,7 @@ N sets the agent count (default: 3, range: 2-7).
 1. **Frame** -- Write a research brief (core question, known constraints, dimensions of exploration). Confirm with the user.
 2. **Spawn** -- Launch N agents in parallel, each with a unique research lens (e.g., prior art, first-principles design, failure modes, scale, contrarian). Agents do not share context.
 3. **Synthesize** -- Merge all findings: convergence points (high confidence), divergence points (tensions), unique insights, and consolidated recommendations.
-4. **Draft PRD** -- Produce a mini-PRD with problem statement, goals/non-goals, requirements, and open questions. Saved as `prd_<topic>.md`.
+4. **Draft PRD** -- Produce a mini-PRD with problem statement, goals/non-goals, requirements with verifiable acceptance criteria, and open questions. Saved as `prd_<topic>.md`.
 
 ## Output
 
