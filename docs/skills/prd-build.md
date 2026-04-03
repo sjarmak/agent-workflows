@@ -1,6 +1,6 @@
 # PRD Build
 
-Automated PRD-to-implementation orchestrator. Decomposes a PRD into a dependency-aware DAG of work units, dispatches parallel agents in isolated worktrees to implement and review each unit, and merges passing work onto an integration branch.
+Automated PRD-to-implementation orchestrator. Decomposes a PRD into dependency-ordered work units, dispatches parallel agents in isolated worktrees to implement and review each unit, and merges passing work onto an integration branch.
 
 ## When to Use
 
@@ -25,7 +25,7 @@ Automated PRD-to-implementation orchestrator. Decomposes a PRD into a dependency
 
 ## How It Works
 
-1. **Decompose** -- Read the PRD and break it into 5-10 work units with verifiable acceptance criteria. Organize into a dependency DAG with topological layers.
+1. **Decompose** -- Read the PRD and break it into 5-10 work units with verifiable acceptance criteria. Organize into dependency layers.
 2. **Execute** -- For each layer, dispatch parallel agents in isolated worktrees to implement. Each agent receives only its unit description, scoped files, and acceptance criteria. After implementation, separate review agents verify each criterion.
 3. **Land** -- Merge passing units onto the integration branch via rebase. If merge fails, evict with context for retry.
 4. **Verify** -- After all layers, run the full test suite. Retry evicted units up to max_passes. Report final status.
@@ -46,7 +46,7 @@ Automated PRD-to-implementation orchestrator. Decomposes a PRD into a dependency
 ## Output
 
 - Implemented code on an integration branch
-- DAG and artifacts in `.claude/prd-build-artifacts/`
+- Work plan and artifacts in `.claude/prd-build-artifacts/`
 - Final summary: units landed/total, passes used, integration branch name
 
 ## Companion Commands

@@ -5,7 +5,7 @@ argument-hint: "<path/to/prd.md> [--max-passes N] [--max-parallel N] [--dry-run]
 allowed-tools: ["Read", "Write", "Edit", "Glob", "Grep", "Agent", "Bash"]
 ---
 
-Automated PRD-to-implementation orchestrator. Takes a PRD, decomposes it into a dependency-aware DAG of work units, dispatches parallel agents in isolated worktrees to implement each unit, runs independent review agents to verify acceptance criteria, and merges passing work onto an integration branch. Handles retries, evictions, and multi-pass recovery.
+Automated PRD-to-implementation orchestrator. Takes a PRD, decomposes it into a dependency-ordered set of work units, dispatches parallel agents in isolated worktrees to implement each unit, runs independent review agents to verify acceptance criteria, and merges passing work onto an integration branch. Handles retries, evictions, and multi-pass recovery.
 
 You are the orchestrator. Your ONLY job is to decompose, dispatch, and land. You do NOT:
 
@@ -33,7 +33,7 @@ Parse:
 - **prd_path**: path to the PRD file (required)
 - **max_passes**: maximum retry passes for evicted units (default: 3)
 - **max_parallel**: maximum parallel agents per layer (default: 5)
-- **dry_run**: if set, decompose and print the DAG but do not execute
+- **dry_run**: if set, decompose and print the work plan but do not execute
 
 Read the PRD file. If it does not exist, report an error and stop.
 
@@ -64,7 +64,7 @@ Break the PRD into work units.
 
 ### Output
 
-Write DAG to `.claude/prd-build-artifacts/dag.json`:
+Write the work plan to `.claude/prd-build-artifacts/dag.json`:
 
 ```json
 [

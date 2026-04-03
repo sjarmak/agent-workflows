@@ -31,7 +31,7 @@ The complete idea-to-implementation pipeline. Use `/research-project` to produce
    - Output: risk-annotated PRD file.
 
 2. **`/prd-build`** -- Takes the PRD and automates implementation:
-   - **Decompose**: Breaks the PRD into 5-10 work units with verifiable acceptance criteria, organized as a dependency DAG.
+   - **Decompose**: Breaks the PRD into 5-10 work units with verifiable acceptance criteria, organized by dependency into layers.
    - **Execute**: Dispatches parallel agents in isolated worktrees, one per work unit. Each agent implements and tests. Separate review agents verify acceptance criteria.
    - **Land**: Merges passing work onto an integration branch. Retries evicted units.
    - **Verify**: Runs full test suite. Reports final status.

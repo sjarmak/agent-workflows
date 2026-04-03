@@ -94,7 +94,7 @@ Build-order planning. Spawns N agents that each propose a different sequencing s
 
 #### [prd-build](skills/prd-build/)
 
-Automated PRD-to-implementation orchestrator. Decomposes a PRD into a dependency-aware DAG of work units, dispatches parallel agents in isolated worktrees to implement and review each unit, and merges passing work onto an integration branch. Handles retries, evictions, and multi-pass recovery.
+Automated PRD-to-implementation orchestrator. Decomposes a PRD into dependency-ordered work units, dispatches parallel agents in isolated worktrees to implement and review each unit, and merges passing work onto an integration branch. Handles retries, evictions, and multi-pass recovery.
 
 ### Pipelines
 
