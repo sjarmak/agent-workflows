@@ -152,6 +152,16 @@ Agent(
 ## Your Task
 Execute the full focus protocol phases sequentially:
 
+### Phase 0: bd worktree setup (MANDATORY before any bd command)
+You are running inside a git worktree (.claude/worktrees/agent-*). The bd Dolt server lives in the main worktree, so bd commands here will fail until a redirect file is in place.
+
+If the project ships a redirect helper, run it:
+```bash
+[ -f scripts/bd-worktree-redirect.sh ] && bash scripts/bd-worktree-redirect.sh || true
+```
+
+The helper is idempotent. If the project does not ship one, every subsequent 'bd note' call will fail silently — DO NOT continue assuming bd works. Surface the failure in your final report so the orchestrator can write notes manually.
+
 ### Phase 1: Plan
 - Read the bead context above
 - Identify files to touch by reading the codebase
@@ -252,8 +262,22 @@ After all agents complete:
 
    Fix any CRITICAL/HIGH findings before proceeding. This catches integration issues that isolated per-bead reviews miss — e.g., two beads both modifying the same module's imports, or one bead's auth refactor breaking another bead's caller pattern.
 
-3. Run `bd ready --pretty` to show what's next
-4. If any agent failed or filed discovery beads, highlight those for the user
+3. **Teardown subagent worktrees and branches (MANDATORY).** After each subagent's branch has been merged into the integration / wave-review branch (or rejected), remove the worktree directory and delete the branch. Without this step, `.claude/worktrees/agent-*` and stale `agent-*` branches accumulate indefinitely (~24GB+ over a few weeks of normal use).
+
+   For each subagent that landed:
+
+   ```bash
+   git worktree unlock <subagent-worktree-path> 2>/dev/null || true
+   git worktree remove --force <subagent-worktree-path>
+   git branch -D <subagent-branch-name> 2>/dev/null || true
+   ```
+
+   The Agent tool returns the worktree path and branch name in its result — capture those when each agent completes. Do NOT skip teardown for "failed" subagents either: a stale worktree with no commits still leaks ~MB of object storage and a stale branch name.
+
+   Guard: never tear down a worktree whose branch has unmerged commits unless the user explicitly approves discarding them.
+
+4. Run `bd ready --pretty` to show what's next
+5. If any agent failed or filed discovery beads, highlight those for the user
 
 ### Parallel Limits
 
@@ -447,6 +471,8 @@ The three-agent Phase 4 approach (code-reviewer + security-reviewer + language-r
 - **Close with context.** The close reason should give a future session enough context to understand what happened without reading the full history.
 - **No floating artifacts.** Do not save `prd_*.md`, `plan_*.md`, or similar files to the working directory. All context lives in bead notes and descriptions. If a skill like `/diverge` produces an artifact, reference its content in a bead note rather than leaving the file.
 - **Tests must pass at every phase boundary.** After execute, after simplify, and after review — tests must be green before proceeding.
+- **Tear down subagent worktrees after merge.** In parallel mode, every dispatched subagent leaves a `.claude/worktrees/agent-*` directory and an `agent-*` branch behind. The Convergence phase MUST remove both for every landed subagent (and for failed subagents whose work is discarded). Skipping teardown leaks ~MB per worktree and is the source of the recurring 24GB+ sweep problem.
+- **Subagents MUST run the bd worktree setup helper before any bd command.** The Phase 0 step in the parallel-dispatch prompt template is mandatory — bd commands silently fail inside fresh worktrees without it, which means subagents cannot post `bd note` attestations and the parallel-mode trust contract breaks.
 
 ## Pipeline Position
 

@@ -127,6 +127,9 @@ ACCEPTANCE CRITERIA:
 ${ACCEPTANCE_LIST}
 
 STEPS:
+0. (If the project uses bd) Run any worktree setup helper present:
+   [ -f scripts/bd-worktree-redirect.sh ] && bash scripts/bd-worktree-redirect.sh || true
+   The helper is idempotent — no-op if the project doesn't use bd.
 1. Read the files in scope to understand current code
 2. Implement the changes. Stay within scoped files.
 3. Write tests for your changes. Run them — they must pass.
@@ -147,6 +150,9 @@ ${ACCEPTANCE_LIST}
 
 Execute these phases in order. Do NOT skip any phase.
 
+PHASE 0 — SETUP: (If the project uses bd) Run any worktree setup helper present:
+  [ -f scripts/bd-worktree-redirect.sh ] && bash scripts/bd-worktree-redirect.sh || true
+  The helper is idempotent — no-op if the project doesn't use bd.
 PHASE 1 — RESEARCH: Read codebase files in scope. Write findings to .claude/prd-build-artifacts/research-${UNIT_ID}.md
 PHASE 2 — PLAN: Write implementation plan to .claude/prd-build-artifacts/plan-${UNIT_ID}.md
 PHASE 3 — IMPLEMENT: Follow your plan. Write the code. Stay in scope.
@@ -190,7 +196,19 @@ Do NOT fix the code. Do NOT suggest improvements beyond acceptance criteria.
 
 After all agents in a layer complete, merge each passing unit onto the integration branch. Rebase, run tests, and either land or evict with context.
 
-Proceed to next layer only after all units in current layer are landed or evicted.
+**Teardown after merge (MANDATORY).** For each unit whose branch lands successfully on the integration branch, remove the subagent's worktree and delete the branch:
+
+```bash
+git worktree unlock <unit-worktree-path> 2>/dev/null || true
+git worktree remove --force <unit-worktree-path>
+git branch -D <unit-branch-name> 2>/dev/null || true
+```
+
+The Agent tool returns the worktree path and branch name in its result — capture those when each implement agent completes. Without teardown, `.claude/worktrees/agent-*` directories accumulate (~24GB+ over a few weeks of normal multi-pass build runs).
+
+For evicted units (review failed, or implement-review loop exhausted), keep the worktree until the eviction record is written so a retry pass can find the artifacts; tear down after the retry decision is final.
+
+Proceed to next layer only after all units in current layer are landed-and-torn-down or evicted.
 
 ## Phase 4: VERIFY
 
@@ -210,6 +228,7 @@ After all layers processed:
 - **Review uses a SEPARATE agent** (different context = no author bias)
 - If an agent fails, retry once. If it fails again, mark failed and continue.
 - If context is getting long, save state and tell user to run `/prd-build-resume`.
+- **Tear down landed worktrees in Phase 3.** Every implement agent leaves a `.claude/worktrees/agent-*` directory and `agent-*` branch behind. Phase 3 LAND MUST `git worktree remove --force` + `git branch -D` immediately after each successful merge. Skipping this leaks ~MB per unit and makes multi-pass runs unsustainable.
 
 ## Pipeline Position
 

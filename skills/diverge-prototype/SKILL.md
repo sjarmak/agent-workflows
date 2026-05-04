@@ -76,6 +76,11 @@ You are a prototype agent implementing a solution based on a PRD.
 Implement a working prototype following this strategy. Focus on must-have requirements first.
 
 ## Instructions
+0. (If the project uses bd for task tracking) Run any worktree setup helper present:
+   ```
+   [ -f scripts/bd-worktree-redirect.sh ] && bash scripts/bd-worktree-redirect.sh || true
+   ```
+   You are inside a git worktree, so bd commands targeting the main repo's Dolt server need a redirect file. The helper is idempotent and a no-op if the project doesn't use bd.
 1. Read the relevant existing code to understand the current state
 2. Implement your approach — create and modify files as needed
 3. Make it work end-to-end for the core requirements if possible
@@ -137,10 +142,24 @@ For each prototype, a 2-3 sentence summary of its most distinctive contribution.
 ## Phase 5: Next Steps
 
 Ask the user how they want to proceed:
-1. **Adopt one prototype** — merge that worktree branch, clean up others
-2. **Cherry-pick and combine** — take best elements from multiple prototypes into a new implementation
-3. **Iterate** — refine the PRD based on learnings and run another round
-4. **Park it** — save findings for later, clean up worktrees
+1. **Adopt one prototype** — merge that worktree branch, then run teardown for ALL prototypes (including the adopted one once merged).
+2. **Cherry-pick and combine** — take best elements from multiple prototypes into a new implementation. Run teardown for ALL prototypes after extraction.
+3. **Iterate** — refine the PRD based on learnings and run another round. Run teardown before launching the next round so worktrees don't accumulate.
+4. **Park it** — save findings for later, run teardown immediately.
+
+### Teardown (MANDATORY in all four paths)
+
+For each prototype's worktree+branch, after the user confirms the path forward:
+
+```bash
+git worktree unlock <prototype-worktree-path> 2>/dev/null || true
+git worktree remove --force <prototype-worktree-path>
+git branch -D <prototype-branch-name> 2>/dev/null || true
+```
+
+The Agent tool returns the worktree path and branch name in its result — capture those when each agent completes so this teardown loop has the data it needs. Without teardown, `.claude/worktrees/agent-*` directories accumulate (~24GB+ over a few weeks of normal use).
+
+Guard: when "Park it" is chosen for a not-yet-merged prototype, confirm with the user before deleting the branch — the work has not yet been preserved elsewhere.
 
 ## Rules
 
@@ -150,3 +169,4 @@ Ask the user how they want to proceed:
 - **PRD is the contract**: agents are evaluated against PRD requirements, not against each other.
 - **Don't discard work**: even "failed" prototypes contain insights. Always extract learnings.
 - **User confirms strategies before spawning**: never auto-launch expensive prototype agents.
+- **Tear down all prototype worktrees in Phase 5.** Every prototype agent leaves a `.claude/worktrees/agent-*` directory and an `agent-*` branch. Phase 5 MUST run the teardown loop for every prototype (adopted, parked, or discarded) once the path forward is decided. Skipping leaks ~MB per prototype and accumulates fast across multiple `/diverge-prototype` runs.
